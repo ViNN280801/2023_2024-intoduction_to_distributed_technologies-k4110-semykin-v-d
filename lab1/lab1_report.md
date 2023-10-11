@@ -75,7 +75,7 @@ I choose the latest version on my OS.
 For example, we have been choose [HashiCorp Vault](https://www.vaultproject.io/). Command to [download](https://hub.docker.com/_/vault/) it:
 
 ```bash
-sudo docker pull HashiCorp/vault:1.13.3
+sudo docker pull hashicorp/vault:1.13.3
 ```
 
 As you can see, I chose 1.13.3 version. The colon (:) serves to specify tag of the image.
@@ -159,14 +159,14 @@ Output:
 
 ```console
 REPOSITORY        TAG       IMAGE ID       CREATED        SIZE
-HashiCorp/vault   1.13.3    9e622613a2d5   4 months ago   253MB
+hashicorp/vault   1.13.3    9e622613a2d5   4 months ago   253MB
 hello-world       latest    9c7a54a9a43c   5 months ago   13.3kB
 ```
 
-Creating deployment of HashiCorp Vault:
+Creating deployment of hashicorp Vault:
 
 ```bash
-kubectl create deployment vault --image=HashiCorp/vault:1.13.3
+kubectl create deployment vault --image=hashicorp/vault:1.13.3
 ```
 
 Output:
@@ -230,7 +230,7 @@ Handling connection for 8200
 
 #### Answer
 
-The token can be found in logs as hint says. It's generating during the deployment of HashiCorp Vault pod.
+The token can be found in logs as hint says. It's generating during the deployment of hashicorp Vault pod.
 To view logs we need to execute the following command:
 
 ```bash
@@ -312,13 +312,13 @@ You may need to set the following environment variables:
 The unseal key and root token are displayed below in case you want to
 seal/unseal the Vault or re-authenticate.
 
-Unseal Key: aHE1kgcXKXT/juvCxZwucqmjnzrGXfrwsfs2I5CTQm0=
-Root Token: hvs.VeI4RRL2ykZAzPG3FdcPNO6J
+Unseal Key: <YOUR UNSEAL KEY>
+Root Token: <YOUR ROOT TOKEN>
 
 Development mode should NOT be used in production installations!
 ```
 
-As we can notice, there is <b>Root Token</b> with value <b>hvs.VeI4RRL2ykZAzPG3FdcPNO6J</b> in this case. Hence, we can get access into the Vault:
+As we can notice, there is <b>Root Token</b> with value <b><YOUR ROOT TOKEN></b> in this case. Hence, we can get access into the Vault:
 
 Step 1: Entering the token
 
@@ -330,7 +330,32 @@ Step 2: Got access
 
 ## Manifest
 
-### TODO: Write YAML and provide execution commands
+There is the YAML file with description of pod details:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: vault
+spec:
+  containers:
+    - name: hashicorp-vault-container
+      image: hashicorp/vault:1.13.3
+      ports:
+        - containerPort: 8200
+```
+
+Creating "pod" with vault using following command:
+
+```bash
+kubectl apply -f manifest.yaml
+```
+
+Output:
+
+```console
+pod/vault created
+```
 
 Command to stop minikube cluster (run it in another terminal):
 
