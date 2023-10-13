@@ -213,7 +213,7 @@ Handling connection for 8200
 
 #### Questions 1
 
-1. What happened now and what did the teams mentioned earlier do?
+1. What happened now and what did the commands mentioned earlier do?
 
 #### Answer
 
