@@ -2,6 +2,8 @@
 
 ## Link on an article
 
+https://medium.com/@vladislav.semykin/proof-of-stake-pos-nominated-proof-of-stake-npos-and-how-they-work-8cbdd6b36c0e
+
 ## Keywords
 
 - Proof-of-Stake
