@@ -362,3 +362,23 @@ Command to stop minikube cluster (run it in another terminal):
 ```bash
 minikube stop
 ```
+
+Scheme of Kubernetes architecture drew in [draw.io](https://app.diagrams.net/):
+
+<img src="img/Kubernetes_cluster.drawio.png">
+
+On this scheme we can see, that Kubernetes cluster consists of manager level and nodes. Manager level responds for all tasks that are requires by a Kubernetes: planning work of containers, service management, serving API-requests, etc. Likewise, manager level it is a comprehensive part that consist from several subparts:
+
+### Members of manager level
+
+1. <b>kube-apiserver</b>: external server for handling API-processing (thing that helps user interoperate with cluster).
+2. <b>etcd</b>: database, where Kubernetes storaging all the information about existing nodes, cluster resources, ...
+3. <b>kube-scheduler</b>: smth like task manager that declares where to run freshly created pods.
+4. <b>kube-controller-manager</b>: responsible for starting resource controllers (for example, deployment).
+5. <b>cloud-controller-manager</b>: interacts with cloud provider (in cloud clusters).
+
+### Members of node
+
+1. <b>kubelet</b>: manages container runtime environment (thus, we can suppose, that it addresses to pod directly, so, I add an arrow from the <b>kubelet</b> to <b>pod</b> as a relation). And added an arrow from <b>kubelet</b> to <b>CRE</b> that stands for <b>container runtime environment</b> to empasize the relation between them.
+2. <b>kube-proxy</b>: spread requests between pods on different nodes and between pods and Internet.
+3. <b>CRE</b>: starts/stops containers, responsible for their interoperations. As I noticed on the scheme, usually CRE = Docker, but Kubernetes also supports other CREs, for example: [rkt](https://www.redhat.com/en/topics/containers/what-is-rkt) or [CRI-O](https://cri-o.io/), or [click here](https://habr.com/ru/companies/flant/articles/340010/) for CRI-O.
