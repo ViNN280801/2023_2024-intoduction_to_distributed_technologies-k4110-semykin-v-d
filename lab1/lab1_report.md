@@ -382,3 +382,21 @@ On this scheme we can see, that Kubernetes cluster consists of manager level and
 1. <b>kubelet</b>: manages container runtime environment (thus, we can suppose, that it addresses to pod directly, so, I add an arrow from the <b>kubelet</b> to <b>pod</b> as a relation). And added an arrow from <b>kubelet</b> to <b>CRE</b> that stands for <b>container runtime environment</b> to empasize the relation between them.
 2. <b>kube-proxy</b>: spread requests between pods on different nodes and between pods and Internet.
 3. <b>CRE</b>: starts/stops containers, responsible for their interoperations. As I noticed on the scheme, usually CRE = Docker, but Kubernetes also supports other CREs, for example: [rkt](https://www.redhat.com/en/topics/containers/what-is-rkt) or [CRI-O](https://cri-o.io/), or [click here](https://habr.com/ru/companies/flant/articles/340010/) for CRI-O.
+
+## Conclusion
+
+In this laboratory work, I embarked on a journey to explore the foundational aspects of Kubernetes, with a focus on installing Docker and Minikube, and deploying my first pod. The goal was to gain familiarity with these essential tools and take the first steps in the Kubernetes world.<p>
+I researched the architecture of Kubernetes, of its components and how they do their work, that is reflects in scheme of Kubernetes architecture that provided above. Likewise, this work implies writing of the manifest that used to start Kubernetes pod that uses Docker image with HashiCorp Vault. To get access into container I used https://localhost:8200, where 8200 is port of container and also port of the host (my PC):
+
+```bash
+kubectl port-forward service/vault 8200:8200
+kubectl port-forward service/vault HOST_PORT:CONTAINER_PORT
+```
+
+To get access to the Vault I needed to check logs which I get by the following command:
+
+```bash
+kubectl logs pods/vault-6c7bb4db6c-k9bqn
+```
+
+In these log messages we can find token to get authorized into the Vault.
