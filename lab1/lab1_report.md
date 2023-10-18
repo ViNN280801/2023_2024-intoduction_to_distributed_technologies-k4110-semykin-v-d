@@ -20,8 +20,6 @@ Date of create: 04.09.2023
 
 Date of finished: XX.XX.2023
 
-# Installing Docker and Minikube, my first manifest
-
 ## Description
 
 This is the first laboratory work in which you will be able to test Docker, install Minikube and deploy your first pod-shell.
