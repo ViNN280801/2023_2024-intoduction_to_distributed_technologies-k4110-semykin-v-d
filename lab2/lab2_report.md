@@ -6,7 +6,7 @@ University: [ITMO University](https://itmo.ru/ru/)<p>
 Faculty: [FICT](https://fict.itmo.ru)<p>
 Course: [Introduction to distributed technologies](https://github.com/itmo-ict-faculty/introduction-to-distributed-technologies)<p>
 Year: 2023/2024<p>
-Group: K4110<p>
+Group: K4110c<p>
 Author: Semykin Vladislav Denisovich<p>
 Lab: Lab2<p>
 Date of create: 18.10.2023<p>
