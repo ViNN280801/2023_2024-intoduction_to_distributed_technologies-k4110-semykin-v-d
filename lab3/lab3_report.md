@@ -53,7 +53,7 @@ At first, we need to combine all the resources, to do this we need namespace:
 apiVersion: apps/v1
 kind: Namespace
 metadata:
-  name: common_namespace
+  name: common-namespace
 ```
 
 Now, we can write YAML for ConfigMap object, where we define 2 environment variables from the previous [laboratory work](https://github.com/ViNN280801/2023_2024-intoduction_to_distributed_technologies-k4110-semykin-v-d/blob/main/lab2/lab2_report.md).
@@ -62,7 +62,8 @@ Now, we can write YAML for ConfigMap object, where we define 2 environment varia
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: react-web-app
+  name: config
+  namespace: common-namespace
 data:
   # There are pairs of key-value, that specified as "key: value"
   REACT_APP_USERNAME: "Semykin Vladislav Denisovich"
@@ -71,7 +72,42 @@ data:
 
 YAMLs for deployment and service got from previous laboratory work, but from `react_manifest.yaml` removed these 2 environment variables which added in ConfigMap object.
 
-For convenience we can combine all the manifests to one single manifest.
+For convenience we can combine all the manifests to one single manifest by using `---`, for example:
+
+```yaml
+# Step 1: Creating namespace to combine all necessary Kubernetes objects
+apiVersion: apps/v1
+kind: Namespace
+metadata:
+  name: common-namespace
+
+# Step 2: Creating ConfigMap object with 2 ENV vars
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: common-namespace
+data:
+  # There are pairs of key-value, that specified as "key: value"
+  REACT_APP_USERNAME: "Semykin Vladislav Denisovich"
+  REACT_APP_COMPANY_NAME: "ITMO. ICT Faculty"
+```
+
+### ResourceQuota
+
+**ResourceQuota** - constraints supply of the process time and memory not only for containers, and for namespaces. The _prefferable_ approach is to use **ResourceQuotas** to limimt count of pods, which can be executing in there. Let's write manifest for it:
+
+```yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: react-web-app
+  namespace: common-namespace
+spec:
+  hard:
+    pods: "2" # Here we define the limit on count of the pods
+```
 
 ### Enabling Ingress resources
 
@@ -97,9 +133,102 @@ You can view the list of minikube maintainers at: https://github.com/kubernetes/
 🌟  The 'ingress' addon is enabled
 ```
 
-### Generating a TLS certificates
+### Generating a TLS certificate
+
+Self-signed TLS certificates are suitable for personal use or for applications that are used internally within an organization.\
+To generate TLC certificate with my signature, I used [this resourse](https://www.linode.com/docs/guides/create-a-self-signed-tls-certificate/), that describes this process in all details.
+
+**Generate the Certificate**:
+
+```bash
+openssl req -new -newkey rsa:4096 -x509 -sha256 -days 363 -nodes -out mycertificate363.crt -keyout mykey.key
+```
+
+- `newkey rsa:4096`: Create a 4096 bit RSA key for use with the certificate. RSA 2048 is the default on more recent versions of OpenSSL but to be sure of the key size, you should specify it during creation.
+- `x509`: Create a self-signed certificate.
+- `sha256`: Generate the certificate request using 265-bit SHA (Secure Hash Algorithm).\
+- `days`: Determines the length of time in days that the certificate is being issued for. For a self-signed certificate, this value can be increased as necessary.\
+- `nodes`: Create a certificate that does not require a passphrase. If this option is excluded, you will be required to enter the passphrase in the console each time the application using it is restarted.
+
+#### Output
+
+```console
+......+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*.....+.......+......+.....+.+...+...+.....+...+................+......+..+.......+..............+......+.+........+......+..........+...+......+............+..+.+..+.......+..+...+.+..............+.+...........+...+......+............+...+....+......+..............+...+...+.......+...+..+...+......+.+..............+....+.....+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*...............+.....................+......+..+.......+...........+...+....+...+...+......+.....+......+...+............+..................+.........+...........................+................+..+.+......+...+.....+......+.+..................+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+.......+...+..+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*.+......+.+...............+.....+...+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*.......+...+....+........+...........................+...+............+.......+.........+..+...+..........+...........+......+............+......+.+......+..+.......+.....+....+.........+...........+......+.............+.................+...+......+.+...+...+...+..+....+......+..+..................+....+...+..+.+.....+.......+......+.........+..+..........+...............+.........+..+............+......+.........+...+..........+.........+......+.....+.........+........................+..........+.....+....+...+..+..................+.........................+.....+.......+............+........+.+......+...+...+............+.....+......+.+........+......................+.....+.+.....+...+....+.................+....+......+...............+...+..+....+.................+.......+..+.+.....+...+...............+...................+...........+.....................+....+.....+................+......+.....+....+......+...+..+.........+..................+.+.........+...+.....+...+.+..............+.+.........+......+...........+.......+...+.....+.........+....+.........+......+......+....................+................+...+......+........+...+.............+............+..+..........+......+..+...+.+........+.......+.........+......+........+...+..........+........+.+...+..+.........+.........+...............+.....................+....+...+..+.+.....+............+............+......+.+...+..+....+..+.......+...............+.....+...+..................+......+...+................+.........+..+.+....................+..........+.........+...........+.......+...+.....+..........+...+......+......+.....+.......+...+.....+.........+.........+.......+.................................+..+....+...+..+....+......+.....+.........+............+.......+...+..............+.+..+...+.........+......+............................+...........+.+..+.+............+..+.......+.....+.........+....+..+......+....+.....+......+...+.......+.....+...+.....................+.+..+.......+...+...........+....+...+............+...............+.....+.+..+...+.+......+.................+.+.................+..................+.+......+........+....+......+...........................+...............+..+.+.....+......+.............+.....+............+......+.......+...+.........+........+......+....+........+....+...+..+.+........+.......+.....+....+...+..+..........+.....+......+...+......+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [XX]:Ru
+State or Province Name (full name) []:SpB
+Locality Name (eg, city) [Default City]:Saint-Petersburg
+Organization Name (eg, company) [Default Company Ltd]:ITMO
+Organizational Unit Name (eg, section) []:ICT
+Common Name (eg, your name or your server's hostname) []:vladislavsemykin
+Email Address []:mymail@mail.ru
+```
+
+This command creates a self-signed certificate (mycertificate363.crt) that is valid for 363 days.
+
+**Impelementation certificate in minikube**
+
+Creating the Kubernetes object - **Secret** with type **tls**. This specific type of Secret is commonly used for storing TLS (Transport Layer Security) certificates, which are used for securing network communication within a Kubernetes cluster.
+
+```bash
+kubectl create secret tls vladislavsemykin-tls --key=mykey.key --cert=mycertificate363.crt
+```
+
+`vladislavsemykin-tls`: Name that is giving to the Secret object.
+`--key=mykey.key`: Flag that specifies the private key file that is part of your TLS certificate.
+`--cert=mycertificate363.crt`: This flag specifies the TLS certificate file. The mycertificate363.crt file contains the public certificate that corresponds to the private key.
+
+#### Output
+
+```console
+secret/vladislavsemykin-tls created
+```
 
 ### Creating an Ingress object as manifest
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: react-web-app
+  namespace: common-namespace
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  labels:
+    name: react-web-app
+spec:
+  rules:
+    - host: vladislavsemykin # Domain hostname
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: react-web-app
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+        - vladislavsemykin # Domain hostname
+      secretName: vladislavsemykin-tls
+```
+
+Applying manifest `start_web_app.yaml` with the command:
+
+```bash
+kubectl apply -f start_web_app.yaml
+```
 
 ### Organazation scheme
 
