@@ -8,7 +8,7 @@ Course: [Introduction to distributed technologies](https://github.com/itmo-ict-f
 Year: 2023/2024\
 Group: K4110c\
 Author: Semykin Vladislav Denisovich\
-Lab: Lab2\
+Lab: Lab3\
 Date of create: 18.10.2023\
 Date of finished: XX.XX.2023
 
