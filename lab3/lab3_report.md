@@ -582,4 +582,11 @@ In summary, I encountered with some issues while I do this laboratory work. Thei
 
 1. Firstly we need to create namespace. Before we try to create the secret.
 2. Initially my `minikube` node started with driver `qemu`, which doesn't allow to tunneling, which means, that command: `minikube tunnel` was accompained by en error. To solve this issue I deleted old minikube node with qemu driver and install new minikube node with `docker` driver: `minikube start --driver=docker`.
-3. Unfortunately, last problem with **cors** is not on my controll. The problem with "CORS" stands for Cross-Origin Resource Sharing. It's a security feature implemented by web browsers to prevent web pages from making requests to a different domain (i.e., a different origin) than the one that served the web page. When CORS is not properly configured, it can lead to issues when one web application hosted on one domain tries to make requests to a different domain's resources, like APIs or data. Because I tried to build the react **web** application, I encountered with this problem when trying to access this data.
+3. 503 Service Temporarily Unavailable: Just need to add labels to service, excatly lines:
+
+```yaml
+selector:
+  app: react-web-app
+```
+
+4. Unfortunately, last problem with **cors** is not on my controll. The problem with "CORS" stands for Cross-Origin Resource Sharing. It's a security feature implemented by web browsers to prevent web pages from making requests to a different domain (i.e., a different origin) than the one that served the web page. When CORS is not properly configured, it can lead to issues when one web application hosted on one domain tries to make requests to a different domain's resources, like APIs or data. Because I tried to build the react **web** application, I encountered with this problem when trying to access this data.
