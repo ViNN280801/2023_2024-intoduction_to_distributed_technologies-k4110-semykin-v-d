@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: react-web-app
+spec:
+  selector:
+    app: react-web-app
+  ports:
+    - port: 3000       # Host port. Lets do it the same - 3000
+      targetPort: 3000 # Port of container (in 'react_manifest.yaml' we used 3000)
+      protocol: TCP

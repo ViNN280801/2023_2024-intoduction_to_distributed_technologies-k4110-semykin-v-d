@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-web-app
+  labels:
+    app: react-web-app
+spec:
+  replicas: 2 # There we define count of replica-sets
+  selector:
+    matchLabels:
+      app: react-web-app
+  template:
+    metadata:
+      labels:
+        app: react-web-app
+    spec:
+      containers:
+        - name: react-web-app-container # Names of container(-s)
+          image: ifilyaninitmo/itdt-contained-frontend:master
+          env: # Here are environment variables
+            - name: REACT_APP_USERNAME
+              value: Semykin Vladislav Denisovich
+            - name: REACT_APP_COMPANY_NAME
+              value: ITMO. ICT Faculty
+          resources:
+          ports:
+            - containerPort: 3000

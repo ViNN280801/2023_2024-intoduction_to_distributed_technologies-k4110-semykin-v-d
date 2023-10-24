@@ -1,0 +1,5 @@
+# Step 1: Creating namespace to combine all necessary Kubernetes objects
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: common-namespace
