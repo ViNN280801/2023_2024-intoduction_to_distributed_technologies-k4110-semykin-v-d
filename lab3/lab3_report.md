@@ -346,9 +346,7 @@ kubectl create secret tls -n common-namespace vladislavsemykin.com-tls --key=myk
 kubectl apply -f start_web_app.yaml
 ```
 
-Viewing all resources:
-
-#### Output
+#### Viewing all resources
 
 ```console
 NAME                                    READY   STATUS    RESTARTS   AGE
@@ -462,9 +460,19 @@ spec:
     app: react-web-app
 ```
 
-Now, it's all ok, but there is the problem with the **cors** (issue within a react web application), that I can't fix.
+Now, it's all ok, but there is the problem with the so-colled [**CORS**](https://www.telerik.com/blogs/all-you-need-to-know-cors-errors) (issue within a react web application), that I can't fix.
 
 <img src="imgs/2.png">
+
+### [Proof of work](https://medium.com/@vladislav.semykin/proof-of-stake-pos-nominated-proof-of-stake-npos-and-how-they-work-8cbdd6b36c0e)
+
+To prove that everything is fine, that pods are work as we expected, I would demonstrate it with port forwarding using the `kubectl` utility:
+
+<img src="imgs/port_forwarding_both_pods.png">
+
+Now, we can see, that both of pods <u><b>are working properly</u><b>.
+
+<img src="imgs/both_pods_in_browser.png">
 
 ### Checking the certificate
 
@@ -567,6 +575,12 @@ Certificate:
         e8:7f:e8:8e:01:f6:cd:32:4b:3c:cc:2a:ab:48:0d:c6:a2:7d:
         98:7c:a8:de:ac:0c:aa:df
 ```
+
+> Do not forget to stop the minikube node:
+>
+> ```bash
+> minikube stop
+> ```
 
 ### Organazation scheme
 
