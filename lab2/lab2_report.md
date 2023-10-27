@@ -10,7 +10,7 @@ Group: K4110c<p>
 Author: Semykin Vladislav Denisovich<p>
 Lab: Lab2<p>
 Date of create: 18.10.2023<p>
-Date of finished: XX.XX.2023<p>
+Date of finished: 27.10.2023<p>
 
 ## Description
 

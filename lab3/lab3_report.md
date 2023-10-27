@@ -1,6 +1,6 @@
 # Laboratory work #3
 
-## Certificates and "secrets" in Minikube, secure data storage.
+## Certificates and "secrets" in Minikube, secure data storage
 
 University: [ITMO University](https://itmo.ru/ru/)\
 Faculty: [FICT](https://fict.itmo.ru)\
@@ -10,7 +10,7 @@ Group: K4110c\
 Author: Semykin Vladislav Denisovich\
 Lab: Lab3\
 Date of create: 18.10.2023\
-Date of finished: XX.XX.2023
+Date of finished: 27.10.2023
 
 ## Description
 
