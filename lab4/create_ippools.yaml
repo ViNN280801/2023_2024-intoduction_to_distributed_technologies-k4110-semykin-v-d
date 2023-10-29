@@ -1,0 +1,20 @@
+apiVersion: projectcalico.org/v3
+kind: IPPool
+metadata:
+  name: multinode-app
+spec:
+  cidr: 192.168.0.0/24
+  ipipMode: Always
+  natOutgoing: true
+  nodeSelector: nodeName == "fstNode"
+
+---
+apiVersion: projectcalico.org/v3
+kind: IPPool
+metadata:
+  name: multinode-app-m02
+spec:
+  cidr: 192.168.1.0/24
+  ipipMode: Always
+  natOutgoing: true
+  nodeSelector: nodeName == "sndName"
