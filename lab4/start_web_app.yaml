@@ -1,0 +1,101 @@
+# Step 1: Creating namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: common-namespace
+
+# Step 2: Creating ConfigMap object with 2 ENV vars
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: common-namespace
+data:
+  # There are pairs of key-value, that specified as "key: value"
+  REACT_APP_USERNAME: "Semykin Vladislav Denisovich"
+  REACT_APP_COMPANY_NAME: "ITMO. ICT Faculty"
+
+# Step 3: Creating ResourceQuota obj to constraint count of pods in the namespace
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: react-web-app
+  namespace: common-namespace
+spec:
+  hard:
+    pods: "2" # Here we define the limit on count of the pods
+
+# Step 4: Creating deployment object that will create replica-sets,
+# which in turn controls replicas (pods) separetely
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-web-app-new
+  namespace: common-namespace
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: react-web-app
+  template:
+    metadata:
+      labels:
+        app: react-web-app
+    spec:
+      containers:
+        - name: react-web-app-container
+          image: ifilyaninitmo/itdt-contained-frontend:master
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: config
+
+# Step 5: Creating service object that controls interoperating between pods
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: react-web-app
+  namespace: common-namespace
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000 # Host port. Lets do it the same - 3000
+      targetPort: 3000 # Port of container (in 'react_manifest.yaml' we used 3000)
+      protocol: TCP
+  selector:
+    app: react-web-app
+
+# Step 6: Creating Ingress object
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: react-web-app
+  namespace: common-namespace
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  labels:
+    name: react-web-app
+spec:
+  rules:
+    - host: vladislavsemykin.com # Domain hostname
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: react-web-app
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+        - vladislavsemykin.com # Domain hostname
+      secretName: vladislavsemykin-tls

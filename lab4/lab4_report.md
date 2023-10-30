@@ -62,7 +62,7 @@ To get acquainted with CNI Calico and the `IPAS Plugin` function, to study the f
 minikube start --driver=docker --nodes 2 -p multinode-app --network-plugin=cni --cni=calico
 ```
 
-```console
+```
 <loveit@fedora ~>$ minikube start --driver=docker --nodes=2 --network-plugin=cni --cni=calico
 😄  [multinode-app] minikube v1.31.2 on Fedora 38
 ✨  Using the docker driver based on user configuration
@@ -100,7 +100,7 @@ Let's check our created nodes and pods:
 kubectl get nodes && kubectl get pods --selector k8s-app=calico-node
 ```
 
-```console
+```
 NAME                STATUS   ROLES    AGE   VERSION
 multinode-app       Ready    <none>   53s   v1.27.4
 multinode-app-m02   Ready    <none>   29s   v1.27.4
@@ -143,7 +143,7 @@ Now, we need to delete default IP pool and create 2 different IP pools for each 
 kubectl get ippool
 ```
 
-```console
+```
 NAME                  AGE
 default-ipv4-ippool   31m
 ```
@@ -190,20 +190,203 @@ Deletion of the default IP pool and applying manifest to create 2 custom IP pool
 ````
 
 ```bash
-kubectl delete ippool default-ipv4-ippool && calicoctl apply -f create_ippools.yaml
+kubectl delete ippool default-ipv4-ippool && calicoctl apply -f create_ippools.yaml --allow-version-mismatch
 ````
 
-```console
+```
 ippool.crd.projectcalico.org "default-ipv4-ippool" deleted
 Successfully applied 2 'IPPool' resource(s)
 ```
 
 ```bash
-calicoctl get ippool
+calicoctl get ippool --allow-version-mismatch
 ```
 
-```console
-NAME                CIDR             SELECTOR                
-multinode-app       192.168.0.0/24   nodeName == "fstNode"   
+```
+NAME                CIDR             SELECTOR
+multinode-app       192.168.0.0/24   nodeName == "fstNode"
 multinode-app-m02   192.168.1.0/24   nodeName == "sndName"
 ```
+
+### Starting web-service
+
+We can get the manifest `start_web_app.yaml` from the [previous laboratory work](https://github.com/ViNN280801/2023_2024-intoduction_to_distributed_technologies-k4110-semykin-v-d/blob/main/lab3/lab3_report.md), but we need to add creating namespace to this manifest.
+
+Let's apply this manifest:
+
+```bash
+kubectl apply -f start_web_app.yaml
+```
+
+```
+namespace/common-namespace created
+configmap/config created
+resourcequota/react-web-app created
+deployment.apps/react-web-app-new created
+service/react-web-app created
+ingress.networking.k8s.io/react-web-app created
+```
+
+Let's check all the created resources:
+
+```bash
+kubectl get namespaces &&\
+kubectl get all -n common-namespace &&\
+kubectl get configmaps -n common-namespace &&\
+kubectl get ingress -n common-namespace
+```
+
+```
+NAME               STATUS   AGE
+common-namespace   Active   84s
+default            Active   20h
+kube-node-lease    Active   20h
+kube-public        Active   20h
+kube-system        Active   20h
+NAME                                    READY   STATUS    RESTARTS   AGE
+pod/react-web-app-new-55b8f6d57-ss8kb   1/1     Running   0          84s
+pod/react-web-app-new-55b8f6d57-txpb7   1/1     Running   0          84s
+
+NAME                    TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+service/react-web-app   ClusterIP   10.111.54.92   <none>        3000/TCP   84s
+
+NAME                                READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/react-web-app-new   2/2     2            2           84s
+
+NAME                                          DESIRED   CURRENT   READY   AGE
+replicaset.apps/react-web-app-new-55b8f6d57   2         2         2       84s
+NAME               DATA   AGE
+config             2      85s
+kube-root-ca.crt   1      85s
+NAME            CLASS    HOSTS                  ADDRESS   PORTS     AGE
+react-web-app   <none>   vladislavsemykin.com             80, 443   85s
+```
+
+Exposing service at the port = 3000:
+
+```bash
+kubectl expose deployment react-web-app-new -n common-namespace --type=NodePort --port=3000
+```
+
+```
+service/react-web-app-new exposed
+```
+
+```bash
+kubectl get pods -n common-namespace -o wide
+```
+
+```
+NAME                                READY   STATUS    RESTARTS   AGE     IP            NODE            NOMINATED NODE   READINESS GATES
+react-web-app-new-55b8f6d57-j6xqd   1/1     Running   0          7m49s   192.168.0.3   multinode-app   <none>           <none>
+react-web-app-new-55b8f6d57-sccgb   1/1     Running   0          7m49s   192.168.0.4   multinode-app   <none>           <none>
+```
+
+### Checking that both of pods are working properly
+
+For do this, we can do `port-forwarding` mechanism:
+
+```bash
+kubectl port-forward -n common-namespace pod/react-web-app-new-55b8f6d57-j6xqd 3000:3000
+kubectl port-forward -n common-namespace pod/react-web-app-new-55b8f6d57-sccgb 9999:3000
+```
+
+<img src="imgs/4.png">
+
+As we can see, both of pods are working properly, if we check them on addresses [http://localhost:3000/](http://localhost:3000/) and [http://localhost:9999/](http://localhost:9999/)
+
+<img src="imgs/5.png">
+
+### Pinging
+
+#### Table 1 - Pod name and corresponding IP
+
+|             Pod name              |     IP      |
+| :-------------------------------: | :---------: |
+| react-web-app-new-55b8f6d57-j6xqd | 192.168.0.3 |
+| react-web-app-new-55b8f6d57-sccgb | 192.168.0.4 |
+
+On the previous image and after executing command to get all resources we can see IPs of the both pod-shells. Now, our task is to enter in one pod and try to ping the second pod from the first using the command `kubectl exec`:
+
+```bash
+kubectl exec -n common-namespace -it react-web-app-new-55b8f6d57-j6xqd -- ping 192.168.0.4
+```
+
+Flags:
+
+`-it` - means interactive mode (`-i`) in terminal (`-t`);
+`-n` - name of the namespace.
+
+```
+PING 192.168.0.4 (192.168.0.4): 56 data bytes
+64 bytes from 192.168.0.4: seq=0 ttl=63 time=0.150 ms
+64 bytes from 192.168.0.4: seq=1 ttl=63 time=0.081 ms
+64 bytes from 192.168.0.4: seq=2 ttl=63 time=0.093 ms
+64 bytes from 192.168.0.4: seq=3 ttl=63 time=0.069 ms
+64 bytes from 192.168.0.4: seq=4 ttl=63 time=0.207 ms
+64 bytes from 192.168.0.4: seq=5 ttl=63 time=0.104 ms
+64 bytes from 192.168.0.4: seq=6 ttl=63 time=0.109 ms
+64 bytes from 192.168.0.4: seq=7 ttl=63 time=0.127 ms
+64 bytes from 192.168.0.4: seq=8 ttl=63 time=0.088 ms
+64 bytes from 192.168.0.4: seq=9 ttl=63 time=0.079 ms
+64 bytes from 192.168.0.4: seq=10 ttl=63 time=0.071 ms
+64 bytes from 192.168.0.4: seq=11 ttl=63 time=0.102 ms
+64 bytes from 192.168.0.4: seq=12 ttl=63 time=0.503 ms
+64 bytes from 192.168.0.4: seq=13 ttl=63 time=0.090 ms
+64 bytes from 192.168.0.4: seq=14 ttl=63 time=0.069 ms
+64 bytes from 192.168.0.4: seq=15 ttl=63 time=0.088 ms
+64 bytes from 192.168.0.4: seq=16 ttl=63 time=0.074 ms
+64 bytes from 192.168.0.4: seq=17 ttl=63 time=0.600 ms
+64 bytes from 192.168.0.4: seq=18 ttl=63 time=0.272 ms
+64 bytes from 192.168.0.4: seq=19 ttl=63 time=0.128 ms
+^C
+--- 192.168.0.4 ping statistics ---
+20 packets transmitted, 20 packets received, 0% packet loss
+round-trip min/avg/max = 0.069/0.155/0.600 ms
+```
+
+Pinging first from second:
+
+```bash
+kubectl exec -n common-namespace -it react-web-app-new-55b8f6d57-sccgb -- ping 192.168.0.3
+```
+
+```
+PING 192.168.0.3 (192.168.0.3): 56 data bytes
+64 bytes from 192.168.0.3: seq=0 ttl=63 time=0.134 ms
+64 bytes from 192.168.0.3: seq=1 ttl=63 time=0.075 ms
+64 bytes from 192.168.0.3: seq=2 ttl=63 time=0.062 ms
+64 bytes from 192.168.0.3: seq=3 ttl=63 time=0.073 ms
+64 bytes from 192.168.0.3: seq=4 ttl=63 time=0.077 ms
+64 bytes from 192.168.0.3: seq=5 ttl=63 time=0.109 ms
+64 bytes from 192.168.0.3: seq=6 ttl=63 time=0.104 ms
+64 bytes from 192.168.0.3: seq=7 ttl=63 time=0.090 ms
+64 bytes from 192.168.0.3: seq=8 ttl=63 time=0.079 ms
+64 bytes from 192.168.0.3: seq=9 ttl=63 time=0.086 ms
+64 bytes from 192.168.0.3: seq=10 ttl=63 time=0.118 ms
+64 bytes from 192.168.0.3: seq=11 ttl=63 time=0.113 ms
+64 bytes from 192.168.0.3: seq=12 ttl=63 time=0.110 ms
+64 bytes from 192.168.0.3: seq=13 ttl=63 time=0.596 ms
+64 bytes from 192.168.0.3: seq=14 ttl=63 time=0.075 ms
+64 bytes from 192.168.0.3: seq=15 ttl=63 time=0.078 ms
+64 bytes from 192.168.0.3: seq=16 ttl=63 time=0.079 ms
+64 bytes from 192.168.0.3: seq=17 ttl=63 time=0.096 ms
+64 bytes from 192.168.0.3: seq=18 ttl=63 time=0.168 ms
+64 bytes from 192.168.0.3: seq=19 ttl=63 time=0.081 ms
+^C
+--- 192.168.0.3 ping statistics ---
+20 packets transmitted, 20 packets received, 0% packet loss
+round-trip min/avg/max = 0.062/0.120/0.596 ms
+```
+
+### Scheme
+
+There is the structure scheme of Kubernetes cluster:
+
+<img src="imgs/lab4_scheme.drawio.png">
+
+## Conclusion
+
+&nbsp;&nbsp;&nbsp;&nbsp;In this last laboratory work, a Kubernetes cluster was successfully set up in multinode mode (in this case count of nodes equals to 2) using Minikube with the Calico [CNI](https://www.cni.dev/)(Container Network Interface) plugin. This configuration allowed to create two and more nodes in the cluster. Custom labels were assigned to these nodes to simulate different geographical locations, and were created IP pools for each node using Calico's IPAM feature.\
+&nbsp;&nbsp;&nbsp;&nbsp;A web service with two replicas was deployed and accessed through a Kubernetes service. Port forwarding was used to confirm the proper functioning of both pods. Network connectivity was verified by pinging one pod from the other, and vice versa.\
+&nbsp;&nbsp;&nbsp;&nbsp;At the last step structure scheme of the Kubernetes cluster had been drew.
