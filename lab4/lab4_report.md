@@ -126,6 +126,10 @@ Command `kubectl edit` would open your default text editor with the manifest of 
 
 <img src="imgs/2.png">
 
+Node manifests after the editing:
+
+<img src="imgs/edited_node_manifests.png">
+
 Let check our labels:
 
 ```bash
@@ -238,28 +242,28 @@ kubectl get ingress -n common-namespace
 
 ```
 NAME               STATUS   AGE
-common-namespace   Active   84s
-default            Active   20h
-kube-node-lease    Active   20h
-kube-public        Active   20h
-kube-system        Active   20h
+common-namespace   Active   30s
+default            Active   23h
+kube-node-lease    Active   23h
+kube-public        Active   23h
+kube-system        Active   23h
 NAME                                    READY   STATUS    RESTARTS   AGE
-pod/react-web-app-new-55b8f6d57-ss8kb   1/1     Running   0          84s
-pod/react-web-app-new-55b8f6d57-txpb7   1/1     Running   0          84s
+pod/react-web-app-new-55b8f6d57-7nvfv   1/1     Running   0          31s
+pod/react-web-app-new-55b8f6d57-sqrb8   1/1     Running   0          31s
 
-NAME                    TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
-service/react-web-app   ClusterIP   10.111.54.92   <none>        3000/TCP   84s
+NAME                    TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/react-web-app   ClusterIP   10.104.223.15   <none>        3000/TCP   31s
 
 NAME                                READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/react-web-app-new   2/2     2            2           84s
+deployment.apps/react-web-app-new   2/2     2            2           31s
 
 NAME                                          DESIRED   CURRENT   READY   AGE
-replicaset.apps/react-web-app-new-55b8f6d57   2         2         2       84s
+replicaset.apps/react-web-app-new-55b8f6d57   2         2         2       31s
 NAME               DATA   AGE
-config             2      85s
-kube-root-ca.crt   1      85s
+config             2      31s
+kube-root-ca.crt   1      31s
 NAME            CLASS    HOSTS                  ADDRESS   PORTS     AGE
-react-web-app   <none>   vladislavsemykin.com             80, 443   85s
+react-web-app   <none>   vladislavsemykin.com             80, 443   31s
 ```
 
 Exposing service at the port = 3000:
@@ -277,9 +281,9 @@ kubectl get pods -n common-namespace -o wide
 ```
 
 ```
-NAME                                READY   STATUS    RESTARTS   AGE     IP            NODE            NOMINATED NODE   READINESS GATES
-react-web-app-new-55b8f6d57-j6xqd   1/1     Running   0          7m49s   192.168.0.3   multinode-app   <none>           <none>
-react-web-app-new-55b8f6d57-sccgb   1/1     Running   0          7m49s   192.168.0.4   multinode-app   <none>           <none>
+NAME                                READY   STATUS    RESTARTS   AGE   IP             NODE                NOMINATED NODE   READINESS GATES
+react-web-app-new-55b8f6d57-7nvfv   1/1     Running   0          58s   192.168.1.64   multinode-app-m02   <none>           <none>
+react-web-app-new-55b8f6d57-sqrb8   1/1     Running   0          58s   192.168.0.17   multinode-app       <none>           <none>
 ```
 
 ### Checking that both of pods are working properly
@@ -287,8 +291,8 @@ react-web-app-new-55b8f6d57-sccgb   1/1     Running   0          7m49s   192.168
 For do this, we can do `port-forwarding` mechanism:
 
 ```bash
-kubectl port-forward -n common-namespace pod/react-web-app-new-55b8f6d57-j6xqd 3000:3000
-kubectl port-forward -n common-namespace pod/react-web-app-new-55b8f6d57-sccgb 9999:3000
+kubectl port-forward -n common-namespace pod/react-web-app-new-55b8f6d57-7nvfv 3000:3000
+kubectl port-forward -n common-namespace pod/react-web-app-new-55b8f6d57-sqrb8 9999:3000
 ```
 
 <img src="imgs/4.png">
@@ -301,15 +305,15 @@ As we can see, both of pods are working properly, if we check them on addresses 
 
 #### Table 1 - Pod name and corresponding IP
 
-|             Pod name              |     IP      |
-| :-------------------------------: | :---------: |
-| react-web-app-new-55b8f6d57-j6xqd | 192.168.0.3 |
-| react-web-app-new-55b8f6d57-sccgb | 192.168.0.4 |
+|             Pod name              |      IP      |
+| :-------------------------------: | :----------: |
+| react-web-app-new-55b8f6d57-7nvfv | 192.168.1.64 |
+| react-web-app-new-55b8f6d57-sqrb8 | 192.168.0.17 |
 
 On the previous image and after executing command to get all resources we can see IPs of the both pod-shells. Now, our task is to enter in one pod and try to ping the second pod from the first using the command `kubectl exec`:
 
 ```bash
-kubectl exec -n common-namespace -it react-web-app-new-55b8f6d57-j6xqd -- ping 192.168.0.4
+kubectl exec -n common-namespace -it react-web-app-new-55b8f6d57-7nvfv -- ping 192.168.0.17
 ```
 
 Flags:
@@ -318,65 +322,65 @@ Flags:
 `-n` - name of the namespace.
 
 ```
-PING 192.168.0.4 (192.168.0.4): 56 data bytes
-64 bytes from 192.168.0.4: seq=0 ttl=63 time=0.150 ms
-64 bytes from 192.168.0.4: seq=1 ttl=63 time=0.081 ms
-64 bytes from 192.168.0.4: seq=2 ttl=63 time=0.093 ms
-64 bytes from 192.168.0.4: seq=3 ttl=63 time=0.069 ms
-64 bytes from 192.168.0.4: seq=4 ttl=63 time=0.207 ms
-64 bytes from 192.168.0.4: seq=5 ttl=63 time=0.104 ms
-64 bytes from 192.168.0.4: seq=6 ttl=63 time=0.109 ms
-64 bytes from 192.168.0.4: seq=7 ttl=63 time=0.127 ms
-64 bytes from 192.168.0.4: seq=8 ttl=63 time=0.088 ms
-64 bytes from 192.168.0.4: seq=9 ttl=63 time=0.079 ms
-64 bytes from 192.168.0.4: seq=10 ttl=63 time=0.071 ms
-64 bytes from 192.168.0.4: seq=11 ttl=63 time=0.102 ms
-64 bytes from 192.168.0.4: seq=12 ttl=63 time=0.503 ms
-64 bytes from 192.168.0.4: seq=13 ttl=63 time=0.090 ms
-64 bytes from 192.168.0.4: seq=14 ttl=63 time=0.069 ms
-64 bytes from 192.168.0.4: seq=15 ttl=63 time=0.088 ms
-64 bytes from 192.168.0.4: seq=16 ttl=63 time=0.074 ms
-64 bytes from 192.168.0.4: seq=17 ttl=63 time=0.600 ms
-64 bytes from 192.168.0.4: seq=18 ttl=63 time=0.272 ms
-64 bytes from 192.168.0.4: seq=19 ttl=63 time=0.128 ms
+PING 192.168.0.17 (192.168.0.17): 56 data bytes
+64 bytes from 192.168.0.17: seq=0 ttl=62 time=0.305 ms
+64 bytes from 192.168.0.17: seq=1 ttl=62 time=0.155 ms
+64 bytes from 192.168.0.17: seq=2 ttl=62 time=0.146 ms
+64 bytes from 192.168.0.17: seq=3 ttl=62 time=0.200 ms
+64 bytes from 192.168.0.17: seq=4 ttl=62 time=0.164 ms
+64 bytes from 192.168.0.17: seq=5 ttl=62 time=0.297 ms
+64 bytes from 192.168.0.17: seq=6 ttl=62 time=0.156 ms
+64 bytes from 192.168.0.17: seq=7 ttl=62 time=0.173 ms
+64 bytes from 192.168.0.17: seq=8 ttl=62 time=0.165 ms
+64 bytes from 192.168.0.17: seq=9 ttl=62 time=0.192 ms
+64 bytes from 192.168.0.17: seq=10 ttl=62 time=0.209 ms
+64 bytes from 192.168.0.17: seq=11 ttl=62 time=0.181 ms
+64 bytes from 192.168.0.17: seq=12 ttl=62 time=0.174 ms
+64 bytes from 192.168.0.17: seq=13 ttl=62 time=0.177 ms
+64 bytes from 192.168.0.17: seq=14 ttl=62 time=0.192 ms
+64 bytes from 192.168.0.17: seq=15 ttl=62 time=0.162 ms
+64 bytes from 192.168.0.17: seq=16 ttl=62 time=0.197 ms
+64 bytes from 192.168.0.17: seq=17 ttl=62 time=0.157 ms
+64 bytes from 192.168.0.17: seq=18 ttl=62 time=0.180 ms
+64 bytes from 192.168.0.17: seq=19 ttl=62 time=0.164 ms
 ^C
---- 192.168.0.4 ping statistics ---
+--- 192.168.0.17 ping statistics ---
 20 packets transmitted, 20 packets received, 0% packet loss
-round-trip min/avg/max = 0.069/0.155/0.600 ms
+round-trip min/avg/max = 0.146/0.187/0.305 ms
 ```
 
 Pinging first from second:
 
 ```bash
-kubectl exec -n common-namespace -it react-web-app-new-55b8f6d57-sccgb -- ping 192.168.0.3
+kubectl exec -n common-namespace -it react-web-app-new-55b8f6d57-sqrb8 -- ping 192.168.1.64
 ```
 
 ```
-PING 192.168.0.3 (192.168.0.3): 56 data bytes
-64 bytes from 192.168.0.3: seq=0 ttl=63 time=0.134 ms
-64 bytes from 192.168.0.3: seq=1 ttl=63 time=0.075 ms
-64 bytes from 192.168.0.3: seq=2 ttl=63 time=0.062 ms
-64 bytes from 192.168.0.3: seq=3 ttl=63 time=0.073 ms
-64 bytes from 192.168.0.3: seq=4 ttl=63 time=0.077 ms
-64 bytes from 192.168.0.3: seq=5 ttl=63 time=0.109 ms
-64 bytes from 192.168.0.3: seq=6 ttl=63 time=0.104 ms
-64 bytes from 192.168.0.3: seq=7 ttl=63 time=0.090 ms
-64 bytes from 192.168.0.3: seq=8 ttl=63 time=0.079 ms
-64 bytes from 192.168.0.3: seq=9 ttl=63 time=0.086 ms
-64 bytes from 192.168.0.3: seq=10 ttl=63 time=0.118 ms
-64 bytes from 192.168.0.3: seq=11 ttl=63 time=0.113 ms
-64 bytes from 192.168.0.3: seq=12 ttl=63 time=0.110 ms
-64 bytes from 192.168.0.3: seq=13 ttl=63 time=0.596 ms
-64 bytes from 192.168.0.3: seq=14 ttl=63 time=0.075 ms
-64 bytes from 192.168.0.3: seq=15 ttl=63 time=0.078 ms
-64 bytes from 192.168.0.3: seq=16 ttl=63 time=0.079 ms
-64 bytes from 192.168.0.3: seq=17 ttl=63 time=0.096 ms
-64 bytes from 192.168.0.3: seq=18 ttl=63 time=0.168 ms
-64 bytes from 192.168.0.3: seq=19 ttl=63 time=0.081 ms
+PING 192.168.1.64 (192.168.1.64): 56 data bytes
+64 bytes from 192.168.1.64: seq=0 ttl=62 time=0.289 ms
+64 bytes from 192.168.1.64: seq=1 ttl=62 time=0.500 ms
+64 bytes from 192.168.1.64: seq=2 ttl=62 time=0.284 ms
+64 bytes from 192.168.1.64: seq=3 ttl=62 time=0.276 ms
+64 bytes from 192.168.1.64: seq=4 ttl=62 time=0.395 ms
+64 bytes from 192.168.1.64: seq=5 ttl=62 time=1.107 ms
+64 bytes from 192.168.1.64: seq=6 ttl=62 time=0.335 ms
+64 bytes from 192.168.1.64: seq=7 ttl=62 time=0.172 ms
+64 bytes from 192.168.1.64: seq=8 ttl=62 time=0.178 ms
+64 bytes from 192.168.1.64: seq=9 ttl=62 time=0.148 ms
+64 bytes from 192.168.1.64: seq=10 ttl=62 time=0.156 ms
+64 bytes from 192.168.1.64: seq=11 ttl=62 time=0.281 ms
+64 bytes from 192.168.1.64: seq=12 ttl=62 time=0.161 ms
+64 bytes from 192.168.1.64: seq=13 ttl=62 time=0.162 ms
+64 bytes from 192.168.1.64: seq=14 ttl=62 time=0.181 ms
+64 bytes from 192.168.1.64: seq=15 ttl=62 time=0.155 ms
+64 bytes from 192.168.1.64: seq=16 ttl=62 time=0.132 ms
+64 bytes from 192.168.1.64: seq=17 ttl=62 time=0.168 ms
+64 bytes from 192.168.1.64: seq=18 ttl=62 time=0.167 ms
+64 bytes from 192.168.1.64: seq=19 ttl=62 time=0.143 ms
 ^C
---- 192.168.0.3 ping statistics ---
+--- 192.168.1.64 ping statistics ---
 20 packets transmitted, 20 packets received, 0% packet loss
-round-trip min/avg/max = 0.062/0.120/0.596 ms
+round-trip min/avg/max = 0.132/0.269/1.107 ms
 ```
 
 ### Scheme
