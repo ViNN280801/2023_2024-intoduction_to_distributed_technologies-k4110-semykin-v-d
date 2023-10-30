@@ -383,6 +383,21 @@ PING 192.168.1.64 (192.168.1.64): 56 data bytes
 round-trip min/avg/max = 0.132/0.269/1.107 ms
 ```
 
+> Do not forget to stop nodes after work with them
+>
+> ```bash
+> minikube stop --all
+> ```
+>
+> ```
+> ✋  Stopping node "minikube"  ...
+> ✋  Stopping node "multinode-app"  ...
+> 🛑  Powering off "multinode-app" via SSH ...
+> ✋  Stopping node "multinode-app-m02"  ...
+> 🛑  Powering off "multinode-app-m02" via SSH ...
+> 🛑  2 nodes stopped.
+> ```
+
 ### Scheme
 
 There is the structure scheme of Kubernetes cluster:
